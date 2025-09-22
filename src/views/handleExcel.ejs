@@ -54,27 +54,58 @@
                       Cấu trúc cột: <strong>Đơn hàng</strong>, <strong>Khách hàng</strong>, <strong>Sản phẩm</strong>, <strong>SL</strong>, <strong>Giá</strong>
                     </div>
 
-                    <div class="row g-3 align-items-end toolbar mb-4">
-                      <div class="col-md-6">
-                        <form id="excelForm" enctype="multipart/form-data">
-                          <label for="excelInput" class="form-label">Import Excel (.xlsx, .xls)</label>
-                          <input class="form-control" type="file" id="excelInput" name="excel" accept=".xlsx,.xls" required />
-                          <button type="submit" class="btn btn-success mt-2">
+                    <div class="row g-3 toolbar mb-4">
+                      <!-- Cột import excel -->
+                      <div class="col-md-6 d-flex flex-column h-100">
+                        <form id="excelForm" enctype="multipart/form-data" class="flex-grow-1 d-flex flex-column justify-content-between">
+                          <div>
+                            <label for="excelInput" class="form-label">Import Excel (.xlsx, .xls)</label>
+                            <input class="form-control" type="file" id="excelInput" name="excel" accept=".xlsx,.xls" required />
+                          </div>
+                          <button type="submit" class="btn btn-success mt-2 align-self-start">
                             <span class="spinner-border spinner-border-sm d-none" id="excelSpinner" role="status" aria-hidden="true"></span>
                             <i class="bi bi-upload"></i> <span id="excelText">Import Excel</span>
                           </button>
                         </form>
                       </div>
-                      <div class="col-md-6 text-md-end">
-                        <button id="btnBulkDelete" class="btn btn-outline-danger me-2" disabled><i class="bi bi-trash"></i> Xóa đã chọn</button>
-                        <a class="btn btn-outline-success" href="/api/order/download"> <i class="bi bi-download"></i> Export toàn bộ dữ liệu </a>
+
+                      <!-- Cột tìm kiếm + export -->
+                      <div class="col-md-6 d-flex flex-column h-100 text-md-end justify-content-between">
+                        <label class="form-label">Tìm kiếm</label>
+                        <div>
+                          <form class="d-inline-flex mb-2 mb-md-0 me-md-2 w-100" action="/order" method="get">
+                            <div class="input-group">
+                              <span class="input-group-text"><i class="bi bi-search"></i></span>
+                              <input
+                                type="text"
+                                class="form-control"
+                                placeholder="Tìm kiếm: đơn hàng, khách hàng, sản phẩm..."
+                                name="q"
+                                value="<%= typeof q !== 'undefined' ? q : '' %>"
+                              />
+                              <button class="btn btn-primary" type="submit">Tìm</button>
+                              <% if (q && q.length > 0) { %>
+                              <a class="btn btn-outline-secondary" href="/order" title="Xóa tìm kiếm">Xóa</a>
+                              <% } %>
+                            </div>
+                          </form>
+                        </div>
+                        <div class="mt-2">
+                          <button id="btnBulkDelete" class="btn btn-outline-danger me-2" disabled><i class="bi bi-trash"></i> Xóa đã chọn</button>
+                          <a class="btn btn-outline-success" href="/api/order/download"> <i class="bi bi-download"></i> Export toàn bộ dữ liệu </a>
+                        </div>
                       </div>
                     </div>
 
                     <div id="msg" class="mt-2"></div>
 
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                      <h6 class="mb-0">Bảng dữ liệu (Orders)</h6>
+                      <div>
+                        <h6 class="mb-0">Bảng dữ liệu (Orders)</h6>
+                        <% if (q && q.length > 0) { %>
+                        <small class="text-muted">Kết quả cho: "<%= q %>"</small>
+                        <% } %>
+                      </div>
                       <span class="badge badge-soft">Tổng: <%= rows?.length || 0 %> bản ghi</span>
                     </div>
 

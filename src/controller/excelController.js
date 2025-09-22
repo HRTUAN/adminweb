@@ -62,11 +62,24 @@ const getExcelPage = (req, res) => {
   (async () => {
     try {
       await ensureTable();
-      const [rows] = await pool.execute("SELECT id, order_code, customer, product, quantity, price FROM orders ORDER BY id DESC");
-      return res.render("handleExcel.ejs", { user: req.session.user, rows });
+      const q = (req.query.q || "").trim();
+      let rows = [];
+      if (q) {
+        const like = `%${q}%`;
+        const [r] = await pool.execute(
+          "SELECT id, order_code, customer, product, quantity, price FROM orders WHERE order_code LIKE ? OR customer LIKE ? OR product LIKE ? ORDER BY id DESC",
+          [like, like, like]
+        );
+        rows = r;
+      } else {
+        const [r] = await pool.execute("SELECT id, order_code, customer, product, quantity, price FROM orders ORDER BY id DESC");
+        rows = r;
+      }
+      return res.render("handleExcel.ejs", { user: req.session.user, rows, q });
     } catch (e) {
       console.error("Lỗi getExcelPage:", e);
-      return res.render("handleExcel.ejs", { user: req.session.user, rows: [] });
+      const q = (req.query.q || "").trim();
+      return res.render("handleExcel.ejs", { user: req.session.user, rows: [], q });
     }
   })();
 };
