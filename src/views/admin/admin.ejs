@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin</title>
+    <link rel="shortcut icon" type="image/png" href="./assets/images/logos/favicon.png" />
+    <link rel="stylesheet" href="./assets/css/styles.min.css" />
+  </head>
+
+  <body>
+    <!--  Body Wrapper -->
+    <div
+      class="page-wrapper"
+      id="main-wrapper"
+      data-layout="vertical"
+      data-navbarbg="skin6"
+      data-sidebartype="full"
+      data-sidebar-position="fixed"
+      data-header-position="fixed"
+    >
+      <!-- Topheader -->
+      <%- include("../partials/topheader") %>
+      <!-- Sidebar Start -->
+      <%- include("../partials/sidebar") %>
+
+      <!--  Sidebar End -->
+      <!--  Main wrapper -->
+      <div class="body-wrapper">
+        <!--  Header Start -->
+        <%- include("../partials/header") %>
+
+        <!--  Header End -->
+      <div class="body-wrapper-inner">
+              <div class="container-fluid">
+    <!-- Danh sách user -->
+    <div class="card mb-4">
+      <div class="card-header">Danh sách User</div>
+      <div class="card-body">
+        <table class="table table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Email</th>
+              <th>Role</th>
+              <% if (user && user.role === "admin") { %>
+              <th>Actions</th>
+              <% } %>
+            </tr>
+          </thead>
+          <tbody>
+            <% users.forEach(u => { %>
+            <tr>
+              <td><%= u.id %></td>
+              <td><%= u.email %></td>
+              <td><%= u.role %></td>
+              <% if (user && user.role === "admin") { %>
+              <td>
+                <button type="button" class="btn btn-sm btn-danger btn-delete-user" data-userid="<%= u.id %>">Xóa</button>
+                <form id="editForm<%= u.id %>" action="/admin/update" method="POST" style="display: inline">
+                  <input type="hidden" name="id" value="<%= u.id %>" />
+                  <input type="email" name="email" value="<%= u.email %>" placeholder="Email" class="form-control form-control-sm d-inline w-auto" style="width: 180px;" required />
+                  <input type="password" name="password" value="••••••••" placeholder="Password" class="form-control form-control-sm d-inline w-auto" style="width: 120px;" />
+                  <select name="role" class="form-select form-select-sm d-inline w-auto" style="width: 90px;">
+                    <option value="user" <%= u.role === 'user' ? 'selected' : '' %>>User</option>
+                    <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                  </select>
+                  <button type="button" onclick="confirmEdit(<%= u.id %>)" class="btn btn-sm btn-warning">Sửa</button>
+                </form>
+                <script>
+                  function confirmEdit(userId) {
+                    if (confirm('Bạn có chắc muốn cập nhật thông tin user này?')) {
+                      document.getElementById('editForm' + userId).submit();
+                    }
+                  }
+                </script>
+              </td>
+              <% } %>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <% if (user && user.role === "admin") { %>
+    <!-- Form thêm user -->
+    <div class="card">
+      <div class="card-header">Thêm user mới</div>
+      <div class="card-body">
+        <form id="addUserForm">
+          <input type="email" class="form-control mb-3" name="email" placeholder="Email" required />
+          <input type="text" class="form-control mb-3" name="password" placeholder="Password" required />
+          <select class="form-select mb-3" name="role" required>
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+          <button type="submit" class="btn btn-primary">Thêm User</button>
+        </form>
+      </div>
+    </div>
+    <% } %>
+              </div>
+      </div>
+
+    
+
+  <script src="./assets/js/admin.js"></script>
+      </div>
+    </div>
+    <script src="./assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="./assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./assets/js/sidebarmenu.js"></script>
+    <script src="./assets/js/app.min.js"></script>
+    <script src="./assets/libs/apexcharts/dist/apexcharts.min.js"></script>
+    <script src="./assets/libs/simplebar/dist/simplebar.js"></script>
+    <script src="./assets/js/dashboard.js"></script>
+    <!-- solar icons -->
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+  </body>
+</html>

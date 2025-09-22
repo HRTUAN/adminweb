@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Upload/Download</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="./assets/css/styles.min.css" />
+    <style>
+      .card-header.bg-success {
+        background: linear-gradient(90deg, #198754, #20c997);
+      }
+      .table thead th {
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+      }
+      .badge-soft {
+        background-color: rgba(25, 135, 84, 0.1);
+        color: #198754;
+        border: 1px solid rgba(25, 135, 84, 0.2);
+      }
+      .toolbar .btn {
+        min-width: 140px;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="page-wrapper"
+      id="main-wrapper"
+      data-layout="vertical"
+      data-navbarbg="skin6"
+      data-sidebartype="full"
+      data-sidebar-position="fixed"
+      data-header-position="fixed"
+    >
+      <%- include("partials/topheader") %> <%- include("partials/sidebar") %>
+
+      <div class="body-wrapper">
+        <%- include("partials/header") %>
+
+        <div class="body-wrapper-inner">
+          <div class="container-fluid">
+            <div class="row justify-content-center">
+              <div class="col-md-12 col-lg-12">
+                <div class="card shadow-sm">
+                  <div class="card-header bg-success">
+                    <h5 class="mb-0 text-white"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Quản lý Order</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="alert alert-info">
+                      Cấu trúc cột: <strong>Đơn hàng</strong>, <strong>Khách hàng</strong>, <strong>Sản phẩm</strong>, <strong>SL</strong>, <strong>Giá</strong>
+                    </div>
+
+                    <div class="row g-3 align-items-end toolbar mb-4">
+                      <div class="col-md-6">
+                        <form id="excelForm" enctype="multipart/form-data">
+                          <label for="excelInput" class="form-label">Import Excel (.xlsx, .xls)</label>
+                          <input class="form-control" type="file" id="excelInput" name="excel" accept=".xlsx,.xls" required />
+                          <button type="submit" class="btn btn-success mt-2">
+                            <span class="spinner-border spinner-border-sm d-none" id="excelSpinner" role="status" aria-hidden="true"></span>
+                            <i class="bi bi-upload"></i> <span id="excelText">Import Excel</span>
+                          </button>
+                        </form>
+                      </div>
+                      <div class="col-md-6 text-md-end">
+                        <button id="btnBulkDelete" class="btn btn-outline-danger me-2" disabled><i class="bi bi-trash"></i> Xóa đã chọn</button>
+                        <a class="btn btn-outline-success" href="/api/order/download"> <i class="bi bi-download"></i> Export toàn bộ dữ liệu </a>
+                      </div>
+                    </div>
+
+                    <div id="msg" class="mt-2"></div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <h6 class="mb-0">Bảng dữ liệu (Orders)</h6>
+                      <span class="badge badge-soft">Tổng: <%= rows?.length || 0 %> bản ghi</span>
+                    </div>
+
+                    <div class="table-responsive">
+                      <table class="table table-striped table-hover align-middle" id="ordersTable">
+                        <thead class="table-light">
+                          <tr>
+                            <th style="width: 42px">
+                              <input type="checkbox" id="chkAll" />
+                            </th>
+                            <th>Đơn hàng</th>
+                            <th>Khách hàng</th>
+                            <th>Sản phẩm</th>
+                            <th class="text-end">SL</th>
+                            <th class="text-end">Giá</th>
+                            <th class="text-end">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <% if (rows && rows.length > 0) { %> <% rows.forEach(r => { %>
+                          <tr data-id="<%= r.id %>">
+                            <td>
+                              <input type="checkbox" class="row-check" />
+                            </td>
+                            <td><%= r.order_code %></td>
+                            <td><%= r.customer %></td>
+                            <td><%= r.product %></td>
+                            <td class="text-end"><%= r.quantity %></td>
+                            <td class="text-end"><%= Number(r.price).toLocaleString('vi-VN') %></td>
+                            <td class="text-end">
+                              <button class="btn btn-sm btn-outline-danger btn-delete"><i class="bi bi-trash"></i></button>
+                            </td>
+                          </tr>
+                          <% }) %> <% } else { %>
+                          <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">Chưa có dữ liệu</td>
+                          </tr>
+                          <% } %>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="./assets/js/order.js"></script>
+
+    <script src="./assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="./assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./assets/js/sidebarmenu.js"></script>
+    <script src="./assets/js/app.min.js"></script>
+  </body>
+</html>

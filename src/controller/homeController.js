@@ -1,93 +1,52 @@
-import pool from '../configs/connectDB';
-import multer from 'multer';
+import pool from "../configs/connectDB.js";
+import multer from "multer";
+import bcrypt from "bcrypt";
 
+// Middleware check login
+const requireLogin = (req, res, next) => {
+  if (!req.session.user) {
+    return res.redirect("/login");
+  }
+  next();
+};
 
-let getHomepage = async (req, res) => {
-    const [rows, fields] = await pool.execute('SELECT * FROM users');
+// Trang login
+let getLoginPage = async (req, res) => {
+  return res.render("login.ejs", { title: "Login Page", error: null });
+};
 
-    return res.render('index.ejs', { dataUser: rows, test: 'abc string test' })
-}
+// Xử lý login
+let postLogin = async (req, res) => {
+  const { email, password } = req.body;
+  const [rows] = await pool.execute("SELECT * FROM users WHERE email = ?", [email]);
 
-let getDetailPage = async (req, res) => {
-    let userId = req.params.id;
-    let [user] = await pool.execute(`select * from users where id = ?`, [userId]);
-    return res.send(JSON.stringify(user))
-}
-
-let createNewUser = async (req, res) => {
-    let { firstName, lastName, email, address } = req.body;
-
-    await pool.execute('insert into users(firstName, lastName, email, address) values (?, ?, ?, ?)',
-        [firstName, lastName, email, address]);
-
-    return res.redirect('/')
-}
-
-let deleteUser = async (req, res) => {
-    let userId = req.body.userId;
-    await pool.execute('delete from users where id = ?', [userId])
-    return res.redirect('/');
-}
-
-let getEditPage = async (req, res) => {
-    let id = req.params.id;
-    let [user] = await pool.execute('Select * from users where id = ?', [id]);
-    return res.render('update.ejs', { dataUser: user[0] }); // x <- y
-}
-
-let postUpdateUser = async (req, res) => {
-    let { firstName, lastName, email, address, id } = req.body;
-
-    await pool.execute('update users set firstName= ?, lastName = ? , email = ? , address= ? where id = ?',
-        [firstName, lastName, email, address, id]);
-
-    return res.redirect('/');
-}
-
-let getUploadFilePage = async (req, res) => {
-    return res.render('uploadFile.ejs')
-}
-
-
-let handleUploadFile = async (req, res) => {
-
-    if (req.fileValidationError) {
-
-        return res.send(req.fileValidationError);
+  if (rows.length > 0) {
+    const user = rows[0];
+    const match = await bcrypt.compare(password, user.password);
+    if (match) {
+      req.session.user = { id: user.id, email: user.email, role: user.role };
+      return res.redirect("/dashboard");
     }
-    else if (!req.file) {
-        return res.send('Please select an image to upload');
-    }
+  }
+  return res.render("login.ejs", { title: "Login Page", error: "Sai email hoặc mật khẩu" });
+};
 
-    // Display uploaded image for user validation
-    res.send(`You have uploaded this image: <hr/><img src="/image/${req.file.filename}" width="500"><hr /><a href="/upload">Upload another image</a>`);
-    // });
-}
+// Trang dashboard
+let getDashboardPage = async (req, res) => {
+  return res.render("dashboard.ejs", { title: "Dashboard", user: req.session.user });
+};
 
+// Logout
+let logout = (req, res) => {
+  req.session.destroy(() => {
+    res.redirect("/login");
+  });
+};
 
-let handleUploadMultipleFiles = async (req, res) => {
-
-    if (req.fileValidationError) {
-        return res.send(req.fileValidationError);
-    }
-    else if (!req.files) {
-        return res.send('Please select an image to upload');
-    }
-
-    let result = "You have uploaded these images: <hr />";
-    const files = req.files;
-    let index, len;
-
-    // Loop through all the uploaded images and display them on frontend
-    for (index = 0, len = files.length; index < len; ++index) {
-        result += `<img src="/image/${files[index].filename}" width="300" style="margin-right: 20px;">`;
-    }
-    result += '<hr/><a href="/upload">Upload more images</a>';
-    res.send(result);
-
-}
-
-module.exports = {
-    getHomepage, getDetailPage, createNewUser, deleteUser, getEditPage, postUpdateUser,
-    getUploadFilePage, handleUploadFile, handleUploadMultipleFiles
-}
+export default {
+  getLoginPage,
+  postLogin,
+  getDashboardPage,
+  logout,
+  requireLogin,
+};
