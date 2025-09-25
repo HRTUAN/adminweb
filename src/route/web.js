@@ -1,4 +1,5 @@
 import express from "express";
+import { body } from "express-validator";
 import homeController from "../controller/homeController.js";
 import adminController from "../controller/adminController.js";
 import fileController from "../controller/fileController.js";
@@ -49,7 +50,14 @@ const initWebRoute = (app) => {
 
   // Auth
   router.get("/login", homeController.getLoginPage);
-  router.post("/login", homeController.postLogin);
+  router.post(
+    "/login",
+    app.locals.loginLimiter,
+    // Validation & sanitization
+    body("email").trim().isEmail().withMessage("Email không hợp lệ").normalizeEmail(),
+    body("password").isLength({ min: 8 }).withMessage("Mật khẩu tối thiểu 8 ký tự"),
+    homeController.postLogin
+  );
   router.get("/dashboard", requireLogin, homeController.getDashboardPage);
   router.get("/logout", homeController.logout);
 

@@ -1,15 +1,20 @@
 import mysql from "mysql2/promise";
+import dotenv from "dotenv";
 
-// // create the connection to database
+dotenv.config();
 
-console.log("Creating connection pool...");
-
+// Create the connection pool using environment variables
+// Never hardcode credentials
 const pool = mysql.createPool({
-  host: "sql12.freesqldatabase.com",
-  user: "sql12799517",
-  database: "sql12799517",
-  password: "YZvZzyYid9",
-  port: "3306",
+  host: process.env.DB_HOST || "localhost",
+  user: process.env.DB_USER || "root",
+  database: process.env.DB_NAME || "appdb",
+  password: process.env.DB_PASSWORD || "",
+  port: Number(process.env.DB_PORT || 3306),
+  waitForConnections: true,
+  connectionLimit: Number(process.env.DB_CONN_LIMIT || 10),
+  queueLimit: 0,
+  ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : undefined,
 });
 
 export default pool;
